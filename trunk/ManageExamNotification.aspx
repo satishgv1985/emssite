@@ -128,6 +128,14 @@
             </td>
         </tr>
         <tr>
+            <td>Apply Jumbling:
+            </td>
+            <td>
+                
+               <asp:CheckBox ID="cbApplyJumbling" runat="server"  />
+            </td>
+        </tr>
+        <tr>
             <td>Notification Start Date:
             </td>
             <td>
