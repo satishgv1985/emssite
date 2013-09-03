@@ -21,7 +21,7 @@ namespace JntuApp.colleges
             JNTUAEMSEntities entities = new JNTUAEMSEntities();
             Student st = new Student();
 
-            st = entities.Students.SingleOrDefault(s => s.HallTicketNumber == rtbHallTicketnumber.Text);
+            st = entities.Students.Where(s=>s.CourseID==st.CourseID).SingleOrDefault(s => s.HallTicketNumber == rtbHallTicketnumber.Text);
             if (st == null)
             {
                 lblStudentMessage.Text = "Student Does Not Exist";

@@ -44,6 +44,7 @@ namespace JntuApp.admin
                 if (item.Selected && item.Text.ToLower().Contains("sup"))
                     en.IsRegular += 2;
             }
+            en.ApplyJumbling = cbApplyJumbling.Checked;
             en.RegulationID = Convert.ToByte(rcbRegulation.SelectedValue);
             en.ExamNotificationYear = Convert.ToInt16(rcbNotificationYear.SelectedValue);
             en.Description = rtbDescriptionForResult.Text;
@@ -178,7 +179,7 @@ namespace JntuApp.admin
 
 
             rcbRegulation.SelectedValue = en.RegulationID + "";
-
+            cbApplyJumbling.Checked = Convert.ToBoolean(en.ApplyJumbling);
             rcbNotificationYear.SelectedValue = en.ExamNotificationYear + "";
 
             rtbDescriptionForResult.Text = en.Description;
