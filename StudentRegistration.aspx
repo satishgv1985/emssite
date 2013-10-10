@@ -5,7 +5,7 @@
     <title>Register Student to Notification</title>
     <script type="text/javascript">
         function removeSelections(sender, args) {
-            var cbSelected = args._checked;
+            var cbSelected = document.getElementById('cbSelectElectives').checked;
             var controls = document.getElementById("<%=pnlElectives.ClientID%>").getElementsByTagName("input");
             for (var i = 0; i < controls.length; i++)
                 controls[i].disabled = !cbSelected;
@@ -21,21 +21,29 @@
             }
         }
 
-        var buttons = [];
-        function cbLoad(sender, args) {
-            Array.add(buttons, sender);
-        }
-       
         function supplySelected() {
-            var length = buttons.length;
-            for (var i = 0; i < length; i++) {
-                buttons[i].set_checked(!args._checked);
+            var cbSelected = document.getElementById('rbSupplementary').checked;
+            var grid = $find("<%=rgStudentSubjects.ClientID %>");
+            var masterTable = grid.get_masterTableView();
+            if (masterTable == null) return;
+            for (var i = 0; i < masterTable.get_dataItems().length; i++) {
+                var gridItemElement = masterTable.get_dataItems()[i].findElement("cbGridCheckBox");
+                gridItemElement.checked = !cbSelected;
             }
         }
 
-
         function GetElectivesSelected(sender, args) {
             alert('hi');
+        }
+        function selElective(eleNo, subID) {
+            if (eleNo == 1)
+                document.getElementById("<%=hdnElective1.ClientID%>").value = subID;
+            else if (eleNo == 2)
+                document.getElementById("<%=hdnElective2.ClientID%>").value = subID;
+            else if (eleNo == 3)
+                document.getElementById("<%=hdnElective3.ClientID%>").value = subID;
+            else if (eleNo == 4)
+                document.getElementById("<%=hdnElective4.ClientID%>").value = subID;
         }
     </script>
 </asp:Content>
@@ -126,10 +134,11 @@
                             <asp:Label ID="lblHallTicketNumber" Text="Enter Hall Ticket Number:" runat="server"></asp:Label>
                         </td>
                         <td style="text-align: left;">
+                            <%-- <asp:TextBox ID="tbHallTicketNumber" runat="server" ValidationGroup="StudentDetails" MaxLength="10"></asp:TextBox>--%>
                             <telerik:RadTextBox ID="rtbHallTicketnumber" runat="server" ValidationGroup="StudentDetails"
                                 MaxLength="10">
                             </telerik:RadTextBox>&nbsp;*
-                            <asp:RequiredFieldValidator ID="rfvHallTicketNumber" runat="server" ControlToValidate="rtbHallTicketnumber"
+                            <asp:RequiredFieldValidator ID="rfvHallTicketNumber" runat="server" ControlToValidate="rtbHallTicketNumber"
                                 ErrorMessage="* Enter Hall Ticket Number" SetFocusOnError="true" ValidationGroup="StudentDetails"
                                 ForeColor="Red" Font-Bold="True" Display="Dynamic"></asp:RequiredFieldValidator>
                             &nbsp;&nbsp;&nbsp;&nbsp;
@@ -162,15 +171,15 @@
                         </td>
                         <td runat="server" visible="false" id="tdRegularOrSupply">
                             <span style="padding: 10px; border: 1px solid black; display: inline-block;">
-                                <asp:RadioButton ID="rbRegular" runat="server" GroupName="RegSupply" Text="Regular" />
+                                <asp:RadioButton ID="rbRegular" runat="server" GroupName="RegSupply" Text="Regular"
+                                    onclick="supplySelected()" />
                                 <br />
                                 <asp:RadioButton ID="rbSupplementary" runat="server" GroupName="RegSupply" Text="Supplementary"
-                                    onchange="supplySelected()" />
+                                    ClientIDMode="Static" onclick="supplySelected()" />
                                 <%--
                                 <telerik:RadButton ID="rbRegular" runat="server" ToggleType="Radio" ButtonType="ToggleButton"
                                     Text="Regular" GroupName="StandardButton" AutoPostBack="false">
                                 </telerik:RadButton>--%>
-                                
                                 <%--
                                 <telerik:RadButton ID="rbSupplementary" runat="server" ToggleType="Radio" Text="Supplementary"
                                     GroupName="StandardButton" ButtonType="ToggleButton" AutoPostBack="false" OnClientCheckedChanged="supplySelected">
@@ -217,7 +226,7 @@
                                 </HeaderTemplate>
                                 <ItemTemplate>
                                     <asp:CheckBox ID="cbGridCheckBox" runat="server" />
-                                   <%-- <telerik:RadButton ID="rbGridCheckBox" runat="server" ToggleType="CheckBox" ButtonType="ToggleButton"
+                                    <%-- <telerik:RadButton ID="rbGridCheckBox" runat="server" ToggleType="CheckBox" ButtonType="ToggleButton"
                                         Text="" AutoPostBack="false" CssClass="cssInsideGrid" OnClientLoad="cbLoad">
                                     </telerik:RadButton>--%>
                                 </ItemTemplate>
@@ -249,7 +258,7 @@
                                 Text="Select/Deselect Electives" AutoPostBack="false" ClientIDMode="Static" Visible="false"
                                 OnClientCheckedChanged="removeSelections">
                             </telerik:RadButton>--%>
-                             <asp:CheckBox ID="cbSelectElectives" runat="server" Visible="false" onclick="removeSelections();"
+                            <asp:CheckBox ID="cbSelectElectives" runat="server" Visible="false" onclick="removeSelections();"
                                 ClientIDMode="Static" Text="Select/Deselect Electives" Checked="true" />
                             <br />
                             <asp:Panel ID="pnlElectives" runat="server">
@@ -342,7 +351,6 @@ namespace JEMS
                     cbSelectElectives.Visible = true;
                     Label lblElectiveText = new Label();
 
-
                     TableCell tcElectiveList = new TableCell();
                     RadioButton rbE;
                     var electiveSubs = sbs.Where(sb => sb.SubjectOrder == item).Select(g => new
@@ -353,16 +361,16 @@ namespace JEMS
                     foreach (var es in electiveSubs)
                     {
                         rbE = new RadioButton();
-                        rbE.Text = es.SubjectName + "<br /><br />";
+                        rbE.Text = es.SubjectName + "<br />";
                         rbE.GroupName = "Elective" + electiveNo;
                         tcElectiveList.Controls.Add(rbE);
+                        rbE.Attributes.Add("onclick", "selElective(" + electiveNo + "," + es.SubjectId + ")");
                     }
 
                     tblElectives = new Table();
                     TableRow trElectiveHeading = new TableRow();
                     TableRow trElectiveList = new TableRow();
                     TableCell tcElectiveHeading = new TableCell();
-                   
 
                     lblElectiveText.Text = "Elective " + electiveNo;
                     lblElectiveText.Font.Bold = true;
@@ -412,14 +420,17 @@ namespace JEMS
                 ClearSelections();
                 return;
             }
+
+            bool isRegular = false;
+            if (rbRegular.Checked) isRegular = true;
+
             try
             {
+
                 foreach (GridDataItem item in rgStudentSubjects.MasterTableView.Items)
                 {
                     RadButton cb = (RadButton)item.Cells[2].Controls[1];
-                    bool isRegular = false;
 
-                    if (rbRegular.Checked) isRegular = true;
 
                     if (cb.Checked)
                     {
@@ -432,18 +443,31 @@ namespace JEMS
                         //});
                     }
                 }
-                
-                
+
+
 
                 #region SaveElectives
                 if (cbSelectElectives.Checked && cbSelectElectives.Visible)
                 {
-
+                    HiddenField[] hiddenFields = { hdnElective1, hdnElective2, hdnElective3, hdnElective4 };
+                    foreach (var item in hiddenFields)
+                    {
+                        //if (item.Value != "-1")
+                        //    entities.StudentSubjectRegistrations.Add(new StudentSubjectRegistration
+                        //   {
+                        //       ExamNotificationID = enID,
+                        //       StudentID = stID,
+                        //       SubjectID = Convert.ToInt32(hdnElective1.Value),
+                        //       RegOrSupply = isRegular
+                        //   });
+                    }
                 }
                 #endregion
 
+
                 entities.SaveChanges();
             }
+
             catch (Exception ex)
             {
                 lblStudentMessage.Text = "Error Occured.  " + ex.Message;
